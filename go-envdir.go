@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,35 +8,34 @@ import (
 )
 
 func main() {
+	if len(os.Args) != 3 {
+		log.Printf("invalid number of arguments needs 2, have: %d", len(os.Args))
+		os.Exit(13)
+	}
 	pathEnv := os.Args[1]
 	program := os.Args[2]
-	fmt.Println(pathEnv)
-	fmt.Println(program)
 
 	file, err := ioutil.ReadDir(pathEnv)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Can't read dir: %v %s", err, file)
+		os.Exit(13)
 	}
 	cmd := exec.Command(program)
 	for _, files := range file {
-		file, err := os.Open(pathEnv + "/" + files.Name())
-		if err != nil {
-			log.Printf("Can't create/open file: %v %s", err, file)
-		}
-		f, err := ioutil.ReadAll(file)
+		f, err := ioutil.ReadFile(pathEnv + "/" + files.Name())
 		if err != nil {
 			log.Printf("Can't read file: %v %s", err, f)
+			os.Exit(13)
 		}
 		envVar := files.Name() + "=" + string(f)
 		cmd.Env = append(cmd.Env,
 			envVar,
 		)
-		fmt.Println(envVar)
 	}
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Can't write file: %v %s", err, out)
+		os.Exit(13)
 	}
-	fmt.Printf("ENV: %s\n", out)
 }
