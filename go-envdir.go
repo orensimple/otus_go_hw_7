@@ -15,19 +15,22 @@ func main() {
 	pathEnv := os.Args[1]
 	program := os.Args[2]
 
-	file, err := ioutil.ReadDir(pathEnv)
+	files, err := ioutil.ReadDir(pathEnv)
 	if err != nil {
-		log.Printf("Can't read dir: %v %s", err, file)
+		log.Printf("Can't read dir: %v %s", err, files)
 		os.Exit(13)
 	}
 	cmd := exec.Command(program)
-	for _, files := range file {
-		f, err := ioutil.ReadFile(pathEnv + "/" + files.Name())
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		f, err := ioutil.ReadFile(pathEnv + "/" + file.Name())
 		if err != nil {
 			log.Printf("Can't read file: %v %s", err, f)
 			os.Exit(13)
 		}
-		envVar := files.Name() + "=" + string(f)
+		envVar := file.Name() + "=" + string(f)
 		cmd.Env = append(cmd.Env,
 			envVar,
 		)
