@@ -28,7 +28,7 @@ func main() {
 		f, err := ioutil.ReadFile(pathEnv + "/" + file.Name())
 		if err != nil {
 			log.Printf("Can't read file: %v %s", err, f)
-			os.Exit(13)
+			continue
 		}
 		envVar := file.Name() + "=" + string(f)
 		cmd.Env = append(cmd.Env,
